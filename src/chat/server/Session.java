@@ -36,7 +36,6 @@ public class Session implements Runnable {
                 String received = input.readUTF();
                 log("client -> server: " + received);
 
-                // 메세지를 전체에게 보내기
                 commandManager.execute(received, this);
             }
         } catch (IOException e) {
