@@ -1,7 +1,5 @@
 package network.tcp.v6;
 
-import network.tcp.SocketCloseUtil;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
