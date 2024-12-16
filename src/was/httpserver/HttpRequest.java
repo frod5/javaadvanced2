@@ -2,12 +2,12 @@ package was.httpserver;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static util.MyLogger.log;
 
 public class HttpRequest {
 
@@ -19,7 +19,7 @@ public class HttpRequest {
     public HttpRequest(BufferedReader reader) throws IOException {
         parseRequestLine(reader);
         parseHeaders(reader);
-        //메세지 바디는 이후에 처리
+        parseBody(reader);
     }
 
     private void parseRequestLine(BufferedReader reader) throws IOException {
@@ -57,6 +57,26 @@ public class HttpRequest {
         while (!(line = reader.readLine()).isEmpty()) {
             String[] headerParts = line.split(":");
             headers.put(headerParts[0].trim(), headerParts[1].trim());
+        }
+    }
+
+    private void parseBody(BufferedReader reader) throws IOException {
+        if(!headers.containsKey("Content-Length")) {
+            return;
+        }
+
+        int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        char[] bodyChars = new char[contentLength];
+        int read = reader.read(bodyChars);
+        if(read != contentLength) {
+            throw new IOException("EOF: Invalid Content Length : " + read);
+        }
+        String body = new String(bodyChars);
+        log("HTTP message Body: " + body);
+
+        String contentType = headers.get("Content-Type");
+        if("application/x-www-form-urlencoded".equals(contentType)) {
+            parseQueryParameters(body);
         }
     }
 
